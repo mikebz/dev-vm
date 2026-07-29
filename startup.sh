@@ -8,7 +8,7 @@ apt-get update && apt-get upgrade -y
 apt-get install -y build-essential make git curl wget gnupg software-properties-common micro
 
 # Enable Debian backports to get Go 1.23+ and updated tools
-echo "deb http://deb.debian.org/debian bookworm-backports main" > /etc/apt/sources.list.d/backports.list
+echo "deb https://deb.debian.org/debian bookworm-backports main" > /etc/apt/sources.list.d/backports.list
 apt-get update
 
 # Install Go-lang and common Go tools (gopls, goimports, godoc, etc.) from backports
