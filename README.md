@@ -30,10 +30,17 @@ gcloud compute instances create dev-vm-12h \
     --metadata-from-file=startup-script=startup.sh
 ```
 
-The VM's startup script (`startup.sh`) automatically runs on the first boot to install core dependencies (Git, Make, Go, Byobu/tmux, Google Cloud CLI):
+The VM's startup script (`startup.sh`) automatically runs on boot, using a sentinel file check (`/var/log/startup_script_done`) to ensure heavy setup runs only on the first boot:
 ```bash
 #!/bin/bash
 export DEBIAN_FRONTEND=noninteractive
+
+# Check if startup script has already executed on a previous boot
+SENTINEL="/var/log/startup_script_done"
+if [ -f "$SENTINEL" ]; then
+    echo "Startup script has already executed on first boot. Skipping."
+    exit 0
+fi
 
 # Update package lists
 apt-get update && apt-get upgrade -y
