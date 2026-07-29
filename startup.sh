@@ -1,11 +1,18 @@
 #!/bin/bash
 export DEBIAN_FRONTEND=noninteractive
 
+# Check if startup script has already executed on a previous boot
+SENTINEL="/var/log/startup_script_done"
+if [ -f "$SENTINEL" ]; then
+    echo "Startup script has already executed on first boot. Skipping."
+    exit 0
+fi
+
 # Update package lists
 apt-get update && apt-get upgrade -y
 
-# Install Core Tools (Makefiles support, git, curl)
-apt-get install -y build-essential make git curl wget gnupg software-properties-common micro
+# Install Core Tools (Makefiles support, git, curl, tmux, byobu)
+apt-get install -y build-essential make git curl wget gnupg software-properties-common micro tmux byobu
 
 # Enable Debian backports to get Go 1.23+ and updated tools
 echo "deb https://deb.debian.org/debian bookworm-backports main" > /etc/apt/sources.list.d/backports.list
@@ -15,12 +22,14 @@ apt-get update
 apt-get install -y -t bookworm-backports golang-go golang-golang-x-tools gopls
 
 # Configure PATH for new users (e.g. mikebz)
+if ! grep -q "GOPATH" /etc/skel/.profile; then
 cat << 'EOF' >> /etc/skel/.profile
 
 # Go paths
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
 EOF
+fi
 
 # Google Cloud SDK is pre-installed on standard GCP Debian images.
 # In case it is missing, this forces installation/update:
@@ -31,11 +40,11 @@ if ! command -v gcloud &> /dev/null; then
 fi
 
 # Install Google Antigravity (agy) to /opt/agy
-mkdir -p /opt/agy
-curl -fsSL https://antigravity.google/cli/install.sh | bash -s -- --dir /opt/agy
+if [ ! -f /opt/agy/agy ]; then
+    mkdir -p /opt/agy
+    curl -fsSL https://antigravity.google/cli/install.sh | bash -s -- --dir /opt/agy
+    ln -sf /opt/agy/agy /usr/local/bin/agy
+fi
 
-# Create a global symlink in /usr/local/bin
-ln -sf /opt/agy/agy /usr/local/bin/agy
-
-
-
+# Mark startup script as completed
+touch "$SENTINEL"

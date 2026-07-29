@@ -30,16 +30,23 @@ gcloud compute instances create dev-vm-12h \
     --metadata-from-file=startup-script=startup.sh
 ```
 
-The VM's startup script (`startup.sh`) automatically runs on the first boot to install core dependencies (Git, Make, Go, Google Cloud CLI):
+The VM's startup script (`startup.sh`) automatically runs on boot, using a sentinel file check (`/var/log/startup_script_done`) to ensure heavy setup runs only on the first boot:
 ```bash
 #!/bin/bash
 export DEBIAN_FRONTEND=noninteractive
 
+# Check if startup script has already executed on a previous boot
+SENTINEL="/var/log/startup_script_done"
+if [ -f "$SENTINEL" ]; then
+    echo "Startup script has already executed on first boot. Skipping."
+    exit 0
+fi
+
 # Update package lists
 apt-get update && apt-get upgrade -y
 
-# Install Core Tools (Makefiles support, git, curl)
-apt-get install -y build-essential make git curl wget gnupg software-properties-common micro
+# Install Core Tools (Makefiles support, git, curl, tmux, byobu)
+apt-get install -y build-essential make git curl wget gnupg software-properties-common micro tmux byobu
 
 # Install Go-lang and common Go tools (gopls, goimports, godoc, gorename, etc.)
 apt-get install -y golang-go golang-golang-x-tools gopls
@@ -77,7 +84,15 @@ Once the VM creation finishes, run the script to connect to the VM over SSH:
 ./2_step.sh
 ```
 
-This runs the native `gcloud` SSH wrapper:
+This connects via SSH and automatically launches or re-attaches to a persistent **Byobu** (`tmux` wrapper) session:
 ```bash
-gcloud compute ssh dev-vm-12h --project=dev-tools-369504 --zone=us-west1-a
+gcloud compute ssh dev-vm-12h --project=dev-tools-369504 --zone=us-west1-a -- -t "byobu"
 ```
+
+### Useful Byobu Shortcuts
+* **`F2`**: Create a new window / tab
+* **`F3` / `F4`**: Move to previous / next window
+* **`F6`**: **Detach** from session (keeps all background processes running)
+* **`F7`**: Scrollback / search terminal history
+* **Reconnecting**: Simply run `./2_step.sh` again to resume your session.
+
