@@ -41,8 +41,16 @@ apt-get update && apt-get upgrade -y
 # Install Core Tools (Makefiles support, git, curl)
 apt-get install -y build-essential make git curl wget gnupg software-properties-common micro
 
-# Install Go-lang (Latest stable tracking via golang-go or manual package)
-apt-get install -y golang-go
+# Install Go-lang and common Go tools (gopls, goimports, godoc, gorename, etc.)
+apt-get install -y golang-go golang-golang-x-tools gopls
+
+# Configure PATH for new users (e.g. mikebz)
+cat << 'EOF' >> /etc/skel/.profile
+
+# Go paths
+export GOPATH=$HOME/go
+export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+EOF
 
 # Google Cloud SDK is pre-installed on standard GCP Debian images.
 # In case it is missing, this forces installation/update:
