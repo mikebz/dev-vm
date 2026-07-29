@@ -4,8 +4,8 @@ export DEBIAN_FRONTEND=noninteractive
 # Update package lists
 apt-get update && apt-get upgrade -y
 
-# Install Core Tools (Makefiles support, git, curl)
-apt-get install -y build-essential make git curl wget gnupg software-properties-common micro
+# Install Core Tools (Makefiles support, git, curl, tmux)
+apt-get install -y build-essential make git curl wget gnupg software-properties-common micro tmux
 
 # Enable Debian backports to get Go 1.23+ and updated tools
 echo "deb https://deb.debian.org/debian bookworm-backports main" > /etc/apt/sources.list.d/backports.list

@@ -30,7 +30,7 @@ gcloud compute instances create dev-vm-12h \
     --metadata-from-file=startup-script=startup.sh
 ```
 
-The VM's startup script (`startup.sh`) automatically runs on the first boot to install core dependencies (Git, Make, Go, Google Cloud CLI):
+The VM's startup script (`startup.sh`) automatically runs on the first boot to install core dependencies (Git, Make, Go, tmux, Google Cloud CLI):
 ```bash
 #!/bin/bash
 export DEBIAN_FRONTEND=noninteractive
@@ -38,8 +38,8 @@ export DEBIAN_FRONTEND=noninteractive
 # Update package lists
 apt-get update && apt-get upgrade -y
 
-# Install Core Tools (Makefiles support, git, curl)
-apt-get install -y build-essential make git curl wget gnupg software-properties-common micro
+# Install Core Tools (Makefiles support, git, curl, tmux)
+apt-get install -y build-essential make git curl wget gnupg software-properties-common micro tmux
 
 # Install Go-lang and common Go tools (gopls, goimports, godoc, gorename, etc.)
 apt-get install -y golang-go golang-golang-x-tools gopls
@@ -77,7 +77,11 @@ Once the VM creation finishes, run the script to connect to the VM over SSH:
 ./2_step.sh
 ```
 
-This runs the native `gcloud` SSH wrapper:
+This connects via SSH and automatically attaches to a persistent `tmux` session (creating one if none exists):
 ```bash
-gcloud compute ssh dev-vm-12h --project=dev-tools-369504 --zone=us-west1-a
+gcloud compute ssh dev-vm-12h --project=dev-tools-369504 --zone=us-west1-a -- -t "tmux attach || tmux new"
 ```
+
+* **Detaching from tmux**: Press `Ctrl + b` then `d`.
+* **Reconnecting**: Simply re-run `./2_step.sh` to pick up right where you left off.
+
