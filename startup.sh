@@ -7,15 +7,19 @@ apt-get update && apt-get upgrade -y
 # Install Core Tools (Makefiles support, git, curl)
 apt-get install -y build-essential make git curl wget gnupg software-properties-common micro
 
-# Install Go-lang and common Go tools (gopls, goimports, godoc, gorename, etc.)
-apt-get install -y golang-go golang-golang-x-tools gopls
+# Enable Debian backports to get Go 1.23+ and updated tools
+echo "deb http://deb.debian.org/debian bookworm-backports main" > /etc/apt/sources.list.d/backports.list
+apt-get update
+
+# Install Go-lang and common Go tools (gopls, goimports, godoc, etc.) from backports
+apt-get install -y -t bookworm-backports golang-go golang-golang-x-tools gopls
 
 # Configure PATH for new users (e.g. mikebz)
 cat << 'EOF' >> /etc/skel/.profile
 
 # Go paths
 export GOPATH=$HOME/go
-export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+export PATH=$PATH:$GOPATH/bin
 EOF
 
 # Google Cloud SDK is pre-installed on standard GCP Debian images.
