@@ -1,5 +1,8 @@
 #!/bin/bash
 export DEBIAN_FRONTEND=noninteractive
+# GCP metadata script runner executes as root on boot, but HOME may be unbound.
+# Fallback to /root for root system setup tasks (normal user sessions use /home/<user>).
+export HOME="${HOME:-/root}"
 
 # Check if startup script has already executed on a previous boot
 SENTINEL="/var/log/startup_script_done"

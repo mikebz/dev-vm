@@ -26,7 +26,16 @@ if [ "$STATUS" = "TERMINATED" ]; then
     fi
 fi
 
-gcloud compute ssh "$VM_NAME" --project="$PROJECT" --zone="$ZONE" -- -t "byobu"
+if ! gcloud compute ssh "$VM_NAME" --project="$PROJECT" --zone="$ZONE" --command="test -f /var/log/startup_script_done" 2>/dev/null; then
+    echo "VM startup script is still running (installing byobu, Go, and dev tools)..."
+    echo "Waiting for setup to complete..."
+    while ! gcloud compute ssh "$VM_NAME" --project="$PROJECT" --zone="$ZONE" --command="test -f /var/log/startup_script_done" 2>/dev/null; do
+        sleep 5
+    done
+    echo "Setup complete!"
+fi
+
+gcloud compute ssh "$VM_NAME" --project="$PROJECT" --zone="$ZONE" -- -t "byobu || tmux || bash"
 
 
 
