@@ -79,15 +79,12 @@ ln -sf /opt/agy/agy /usr/local/bin/agy
 
 ## Step 2: Establish Local SSH Connection
 
-Once the VM creation finishes, run the script to connect to the VM over SSH:
+Once the VM creation finishes (or if the VM was stopped after 12 hours), run the script to connect to the VM over SSH:
 ```bash
 ./2_step.sh
 ```
 
-This connects via SSH and automatically launches or re-attaches to a persistent **Byobu** (`tmux` wrapper) session:
-```bash
-gcloud compute ssh dev-vm-12h --project=dev-tools-369504 --zone=us-west1-a -- -t "byobu"
-```
+If the instance is stopped, this script will automatically restart it before connecting via SSH and launching or re-attaching to a persistent **Byobu** (`tmux` wrapper) session.
 
 ### Useful Byobu Shortcuts
 * **`F2`**: Create a new window / tab
