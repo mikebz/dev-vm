@@ -17,11 +17,16 @@ Run the script to provision the VM:
 ./1_step.sh
 ```
 
-This runs the following `gcloud` command:
+`1_step.sh` automatically attempts creation across candidate zones (`us-west1-a`, `us-west1-b`, `us-west1-c`, `us-central1-a`, etc.) in case a specific zone is affected by resource pool exhaustion (`ZONE_RESOURCE_POOL_EXHAUSTED`). You can also override the target zone explicitly:
+```bash
+ZONE="us-west1-b" ./1_step.sh
+```
+
+This attempts `gcloud compute instances create`:
 ```bash
 gcloud compute instances create dev-vm-12h \
     --project=dev-tools-369504 \
-    --zone=us-west1-a \
+    --zone=<zone> \
     --machine-type=e2-standard-2 \
     --image-family=debian-12 \
     --image-project=debian-cloud \
@@ -79,15 +84,12 @@ ln -sf /opt/agy/agy /usr/local/bin/agy
 
 ## Step 2: Establish Local SSH Connection
 
-Once the VM creation finishes, run the script to connect to the VM over SSH:
+Once the VM creation finishes (or if the VM was stopped after 12 hours), run the script to connect to the VM over SSH:
 ```bash
 ./2_step.sh
 ```
 
-This connects via SSH and automatically launches or re-attaches to a persistent **Byobu** (`tmux` wrapper) session:
-```bash
-gcloud compute ssh dev-vm-12h --project=dev-tools-369504 --zone=us-west1-a -- -t "byobu"
-```
+`2_step.sh` dynamically locates the zone where `dev-vm-12h` was created. If the instance is stopped, it automatically attempts to restart it in that zone before connecting via SSH and launching or re-attaching to a persistent **Byobu** (`tmux` wrapper) session.
 
 ### Useful Byobu Shortcuts
 * **`F2`**: Create a new window / tab
