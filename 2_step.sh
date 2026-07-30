@@ -1,10 +1,28 @@
 #!/bin/bash
-STATUS=$(gcloud compute instances describe dev-vm-12h --project=dev-tools-369504 --zone=us-west1-a --format="value(status)" 2>/dev/null)
+PROJECT="dev-tools-369504"
+VM_NAME="dev-vm-12h"
 
-if [ "$STATUS" = "TERMINATED" ] || [ "$STATUS" = "STOPPED" ]; then
-    echo "Instance dev-vm-12h is stopped. Starting..."
-    gcloud compute instances start dev-vm-12h --project=dev-tools-369504 --zone=us-west1-a
+ZONE=$(gcloud compute instances list --project="$PROJECT" --filter="name=$VM_NAME" --format="value(zone)" 2>/dev/null | head -n 1)
+
+if [ -z "$ZONE" ]; then
+    echo "Error: Instance '$VM_NAME' not found in project '$PROJECT'." >&2
+    echo "Run ./1_step.sh to create it." >&2
+    exit 1
 fi
 
-gcloud compute ssh dev-vm-12h --project=dev-tools-369504 --zone=us-west1-a -- -t "byobu"
+STATUS=$(gcloud compute instances describe "$VM_NAME" --project="$PROJECT" --zone="$ZONE" --format="value(status)" 2>/dev/null)
+
+if [ "$STATUS" = "TERMINATED" ] || [ "$STATUS" = "STOPPED" ]; then
+    echo "Instance $VM_NAME is stopped in zone $ZONE. Starting..."
+    if ! gcloud compute instances start "$VM_NAME" --project="$PROJECT" --zone="$ZONE"; then
+        echo "Failed to start $VM_NAME in zone $ZONE." >&2
+        echo "If the zone is out of resources, delete the VM with:" >&2
+        echo "  gcloud compute instances delete $VM_NAME --project=$PROJECT --zone=$ZONE" >&2
+        echo "and re-run ./1_step.sh to recreate it in an available zone." >&2
+        exit 1
+    fi
+fi
+
+gcloud compute ssh "$VM_NAME" --project="$PROJECT" --zone="$ZONE" -- -t "byobu"
+
 
