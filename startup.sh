@@ -46,7 +46,9 @@ fi
 if [ ! -f /opt/agy/agy ]; then
     mkdir -p /opt/agy
     curl -fsSL https://antigravity.google/cli/install.sh | bash -s -- --dir /opt/agy
-    ln -sf /opt/agy/agy /usr/local/bin/agy
+    if [ -f /opt/agy/agy ]; then
+        ln -sf /opt/agy/agy /usr/local/bin/agy
+    fi
 fi
 
 # Mark startup script as completed
