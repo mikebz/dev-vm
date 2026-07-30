@@ -24,15 +24,39 @@ apt-get update
 # Install Go-lang and common Go tools (gopls, goimports, godoc, etc.) from backports
 apt-get install -y -t bookworm-backports golang-go golang-golang-x-tools gopls
 
-# Configure PATH for new users (e.g. mikebz)
+# Install golangci-lint CLI
+if ! command -v golangci-lint &> /dev/null; then
+    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin
+fi
+
+
+# Configure PATH system-wide and for user profiles
+cat << 'EOF' > /etc/profile.d/go.sh
+# Go paths
+export GOPATH=$HOME/go
+export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+EOF
+
 if ! grep -q "GOPATH" /etc/skel/.profile; then
 cat << 'EOF' >> /etc/skel/.profile
 
 # Go paths
 export GOPATH=$HOME/go
-export PATH=$PATH:$GOPATH/bin
+export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
 EOF
 fi
+
+for profile in /home/*/.profile; do
+    if [ -f "$profile" ] && ! grep -q "GOPATH" "$profile"; then
+cat << 'EOF' >> "$profile"
+
+# Go paths
+export GOPATH=$HOME/go
+export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+EOF
+    fi
+done
+
 
 # Google Cloud SDK is pre-installed on standard GCP Debian images.
 # In case it is missing, this forces installation/update:
