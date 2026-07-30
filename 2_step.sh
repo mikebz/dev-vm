@@ -10,9 +10,12 @@ if [ -z "$ZONE" ]; then
     exit 1
 fi
 
-STATUS=$(gcloud compute instances describe "$VM_NAME" --project="$PROJECT" --zone="$ZONE" --format="value(status)" 2>/dev/null)
+if ! STATUS=$(gcloud compute instances describe "$VM_NAME" --project="$PROJECT" --zone="$ZONE" --format="value(status)"); then
+    echo "Error: Failed to describe instance '$VM_NAME' in zone '$ZONE'." >&2
+    exit 1
+fi
 
-if [ "$STATUS" = "TERMINATED" ] || [ "$STATUS" = "STOPPED" ]; then
+if [ "$STATUS" = "TERMINATED" ]; then
     echo "Instance $VM_NAME is stopped in zone $ZONE. Starting..."
     if ! gcloud compute instances start "$VM_NAME" --project="$PROJECT" --zone="$ZONE"; then
         echo "Failed to start $VM_NAME in zone $ZONE." >&2
@@ -24,5 +27,6 @@ if [ "$STATUS" = "TERMINATED" ] || [ "$STATUS" = "STOPPED" ]; then
 fi
 
 gcloud compute ssh "$VM_NAME" --project="$PROJECT" --zone="$ZONE" -- -t "byobu"
+
 
 
