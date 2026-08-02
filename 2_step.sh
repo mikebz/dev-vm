@@ -29,14 +29,14 @@ fi
 ERR_OUTPUT=$(gcloud compute ssh "$VM_NAME" --project="$PROJECT" --zone="$ZONE" --command="test -f /var/log/startup_script_done" 2>&1)
 STATUS_CODE=$?
 
-if [ "$STATUS_CODE" -eq 1 ]; then
+if [ "$STATUS_CODE" -eq 1 ] && [ -z "$ERR_OUTPUT" ]; then
     echo "Error: VM startup script is still running (installing byobu, Go, and dev tools)." >&2
     echo "Please wait a moment for setup to finish and try again." >&2
     exit 1
 elif [ "$STATUS_CODE" -ne 0 ]; then
     echo "Error: Failed to connect to $VM_NAME via SSH (exit code $STATUS_CODE)." >&2
     if [ -n "$ERR_OUTPUT" ]; then
-        echo "$ERR_OUTPUT" >&2
+        printf '%s\n' "$ERR_OUTPUT" >&2
     fi
     exit "$STATUS_CODE"
 fi
