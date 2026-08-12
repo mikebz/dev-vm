@@ -13,6 +13,7 @@ for z in "${ZONES[@]}"; do
         --project="$PROJECT" \
         --zone="$z" \
         --machine-type=e2-standard-2 \
+        --boot-disk-size=30GB \
         --image-family=debian-12 \
         --image-project=debian-cloud \
         --max-run-duration=12h \
