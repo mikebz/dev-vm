@@ -29,6 +29,7 @@ gcloud compute instances create dev-vm-12h \
     --zone=<zone> \
     --machine-type=e2-standard-2 \
     --boot-disk-size=30GB \
+    --boot-disk-type=pd-balanced \
     --image-family=debian-12 \
     --image-project=debian-cloud \
     --max-run-duration=12h \
