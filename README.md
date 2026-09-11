@@ -17,9 +17,10 @@ Run the script to provision the VM:
 ./1_step.sh
 ```
 
-`1_step.sh` automatically attempts creation across candidate zones (`us-west1-a`, `us-west1-b`, `us-west1-c`, `us-central1-a`, etc.) in case a specific zone is affected by resource pool exhaustion (`ZONE_RESOURCE_POOL_EXHAUSTED`). You can also override the target zone explicitly:
+`1_step.sh` automatically attempts creation across candidate zones (`us-west1-a`, `us-west1-b`, `us-west1-c`, `us-central1-a`, etc.) in case a specific zone is affected by resource pool exhaustion (`ZONE_RESOURCE_POOL_EXHAUSTED`). You can also override the target zone or specify an account explicitly:
 ```bash
 ZONE="us-west1-b" ./1_step.sh
+ACCOUNT="user@example.com" ./1_step.sh
 ```
 
 This attempts `gcloud compute instances create`:
@@ -28,7 +29,8 @@ gcloud compute instances create dev-vm-12h \
     --project=dev-tools-369504 \
     --zone=<zone> \
     --machine-type=e2-standard-2 \
-    --boot-disk-size=30GB \
+    --boot-disk-size=200GB \
+    --boot-disk-type=pd-balanced \
     --image-family=debian-12 \
     --image-project=debian-cloud \
     --max-run-duration=12h \
@@ -48,7 +50,13 @@ Once the VM creation finishes (or if the VM was stopped after 12 hours), run the
 ./2_step.sh
 ```
 
-`2_step.sh` dynamically locates the zone where `dev-vm-12h` was created. If the instance is stopped, it automatically attempts to restart it in that zone before connecting via SSH and launching or re-attaching to a persistent **Byobu** (`tmux` wrapper) session.
+You can also pass `ACCOUNT` or `ZONE` explicitly if needed:
+```bash
+ACCOUNT="user@example.com" ./2_step.sh
+ZONE="us-west1-a" ./2_step.sh
+```
+
+`2_step.sh` dynamically locates the zone where `dev-vm-12h` was created (or uses the `$ZONE` override if provided). If the instance is stopped, it automatically attempts to restart it in that zone before connecting via SSH and launching or re-attaching to a persistent **Byobu** (`tmux` wrapper) session.
 
 ### Useful Byobu Shortcuts
 * **`F2`**: Create a new window / tab

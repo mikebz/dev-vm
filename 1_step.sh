@@ -7,13 +7,28 @@ if [ -n "$ZONE" ]; then
     ZONES=("$ZONE")
 fi
 
+ACCOUNT_ARGS=()
+if [ -n "$ACCOUNT" ]; then
+    ACCOUNT_ARGS=(--account="$ACCOUNT")
+fi
+
+EXISTING_ZONE=$(gcloud compute instances list "${ACCOUNT_ARGS[@]}" --project="$PROJECT" --filter="name=$VM_NAME" --format="value(zone)" 2>/dev/null | head -n 1)
+
+if [ -n "$EXISTING_ZONE" ]; then
+    echo "Error: Instance '$VM_NAME' already exists in zone '$EXISTING_ZONE'." >&2
+    echo "Run ./2_step.sh to connect to it." >&2
+    exit 1
+fi
+
 for z in "${ZONES[@]}"; do
     echo "Attempting to create $VM_NAME in zone $z..."
     if gcloud compute instances create "$VM_NAME" \
+        "${ACCOUNT_ARGS[@]}" \
         --project="$PROJECT" \
         --zone="$z" \
         --machine-type=e2-standard-2 \
-        --boot-disk-size=30GB \
+        --boot-disk-size=200GB \
+        --boot-disk-type=pd-balanced \
         --image-family=debian-12 \
         --image-project=debian-cloud \
         --max-run-duration=12h \
