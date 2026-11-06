@@ -70,6 +70,24 @@ if ! command -v gcloud &> /dev/null; then
     apt-get update && apt-get install -y google-cloud-cli
 fi
 
+# Install Terraform CLI (pinned)
+TERRAFORM_VERSION="1.9.0"
+TERRAFORM_SHA256="ab1358e73a81096bbe04201ef403a32e0765c5f6e360692d170d32d0889a4871"
+if ! command -v terraform &> /dev/null; then
+    tmp="$(mktemp -d)"
+    if ! (
+        curl -sSfL "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" -o "$tmp/terraform.zip" &&
+        echo "${TERRAFORM_SHA256}  $tmp/terraform.zip" | sha256sum -c - &&
+        unzip -q "$tmp/terraform.zip" -d /usr/local/bin &&
+        chmod 0755 /usr/local/bin/terraform
+    ); then
+        rm -rf "$tmp"
+        echo "Error: Failed to install Terraform ${TERRAFORM_VERSION}." >&2
+        exit 1
+    fi
+    rm -rf "$tmp"
+fi
+
 # Install Google Antigravity (agy) to /opt/agy
 if [ ! -f /opt/agy/agy ]; then
     mkdir -p /opt/agy
