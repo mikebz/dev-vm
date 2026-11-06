@@ -38,7 +38,7 @@ fi
 cat << 'EOF' > /etc/profile.d/go.sh
 # Go paths
 export GOPATH=$HOME/go
-export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+export PATH=$PATH:$GOPATH/bin
 EOF
 
 if [ ! -f /etc/skel/.profile ] || ! grep -q "GOPATH" /etc/skel/.profile; then
@@ -46,7 +46,7 @@ cat << 'EOF' >> /etc/skel/.profile
 
 # Go paths
 export GOPATH=$HOME/go
-export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+export PATH=$PATH:$GOPATH/bin
 EOF
 fi
 
@@ -56,7 +56,7 @@ cat << 'EOF' >> "$profile"
 
 # Go paths
 export GOPATH=$HOME/go
-export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+export PATH=$PATH:$GOPATH/bin
 EOF
     fi
 done
