@@ -25,7 +25,7 @@ apt-get update
 apt-get install -y -t bookworm-backports golang-go golang-golang-x-tools gopls
 
 # Install golangci-lint CLI (pinned)
-GOLANGCI_LINT_VERSION="v1.61.0"
+GOLANGCI_LINT_VERSION="v2.15.0"
 if ! command -v golangci-lint &> /dev/null; then
     tmp="$(mktemp)"
     curl -sSfL "https://raw.githubusercontent.com/golangci/golangci-lint/${GOLANGCI_LINT_VERSION}/install.sh" -o "$tmp"
