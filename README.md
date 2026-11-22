@@ -65,3 +65,12 @@ ZONE="us-west1-a" ./2_step.sh
 * **`F7`**: Scrollback / search terminal history
 * **Reconnecting**: Simply run `./2_step.sh` again to resume your session.
 
+---
+
+## Automated Code Review
+
+Pull requests targeting `main` are reviewed automatically by the [`.github/workflows/claude-review.yml`](.github/workflows/claude-review.yml) GitHub Actions workflow:
+* Runs on non-draft pull requests from branches in this repository (skipping forks and bot PRs) using `anthropics/claude-code-action` pointed at Meta's `muse-spark-1.3-contributor` model (`https://api.meta.ai`).
+* Requires a `MUSE_API_KEY` repository secret under **Settings → Secrets and variables → Actions**; if the secret is missing, the review job fails.
+* Note: Meta's `contributor` tier allows Meta to use prompts and completions (including pull request diffs) to improve its products.
+
