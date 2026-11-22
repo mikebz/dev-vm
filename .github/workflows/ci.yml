@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+# A new push to a pull request makes the in-flight run obsolete.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  lint:
+    name: Syntax check and ShellCheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # One file per call: `bash -n a.sh b.sh` checks only a.sh and passes the
+      # rest to it as arguments.
+      - name: Syntax check
+        run: |
+          for f in ./*.sh; do
+            bash -n "$f"
+          done
+
+      # ShellCheck ships on GitHub's Ubuntu runner images.
+      - name: ShellCheck
+        run: shellcheck ./*.sh
